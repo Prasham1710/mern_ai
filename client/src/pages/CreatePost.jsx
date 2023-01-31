@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { preview } from '../assets';
 import { getRandomPrompt } from '../utils';
 import { FormField, Loader } from '../components';
@@ -14,9 +13,34 @@ const CreatePost = () => {
   });
 
   const [generatingImg, setGeneratingImg] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const generateImage =() =>{
+  const generateImage =async() =>{
+    if (form.prompt){
+      try{
+        setGeneratingImg(true);
+        const response = await fetch('http://localhost:8080/api/v1/dalle',{
+          method: 'Post',
+          headers : {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: form.prompt,
+          }),
+        })
+        const data = await response.json();
+
+        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+      }
+      catch(error){
+        alert(error);
+    } finally{
+      setGeneratingImg(false);
+    }
+  } else {
+    alert('Please enter a prompt')
+    }
+
 
   }
   const handleSubmit = () => {
